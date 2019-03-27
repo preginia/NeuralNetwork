@@ -1,0 +1,3 @@
+﻿  Neuron.cpp
+c:\users\przemek\documents\neuralnetwork-master\network\neuron.cpp(53): warning C4267: 'return': conversion from 'size_t' to 'int', possible loss of data
+  Network.vcxproj -> C:\Users\Przemek\Documents\NeuralNetwork-master\x64\Debug\Network.exe
