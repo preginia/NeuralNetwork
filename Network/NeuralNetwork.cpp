@@ -10,6 +10,11 @@ const int classesAmount = 4;
 const std::string CLASSES[classesAmount] = { "1","2","3","4" };
 
 
+long double deriv(long double x)
+{
+	return (x * (1.0 - x));
+}
+
 
 NeuralNetwork::NeuralNetwork(int inputLayerSize, int hiddenLayerSize, int outputLayerSize)
 {
@@ -146,7 +151,7 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				// on i index in last layer and computing error
 
 				expectedValue = ((sample.getClass() == CLASSES[i]) ? 1.0 : 0.0);
-				outputLayerError[i] =(expectedValue - (outputLayerOutputs[i]));
+				outputLayerError[i] =(expectedValue - (outputLayerOutputs[i]) * deriv(outputLayerOutputs[i]));
 			}
 
 			std::vector<long double> hiddenLayerError;
@@ -158,7 +163,8 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				{
 					error += (outputLayerError[j] * outputLayer[j][i]);
 				}
-				hiddenLayerError[i] = error;
+
+				hiddenLayerError[i] = error * deriv(hiddenLayerOutputs[i]);
 
 			}
 
@@ -171,7 +177,7 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				{
 					error += (hiddenLayerError[j] * hiddenLayer[j][i]);
 				}
-				inputLayerError[i] = error;
+				inputLayerError[i] = error *  deriv(inputLayerOutputs[i]);
 
 			}
 

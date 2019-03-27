@@ -11,7 +11,7 @@ long double sig(long double x)
 
 long double der_sig(long double x)
 {
-	return (sig(x) * (1.0 - sig(x)));
+	return (x * (1.0 - x));
 }
 
 
@@ -21,7 +21,7 @@ Neuron::Neuron(int size)
 	this->weights.resize(size);
 	for (int i = 0; i < size; i++)
 	{
-		this->weights[i] = sqrt(2.0 / (size + 1));
+		this->weights[i] = sqrt(2.0 / (size + 1.0));
 	}
 
 	bias = 0;
@@ -63,9 +63,9 @@ void Neuron::modify(long double n, long double error, std::vector<long double> i
 	for (int i = 0; i < weights.size(); i++)
 	{
 		long double weight = weights[i];
-		weight += n * error * inputs[i] * der_sig(output);
+		weight += n * error * inputs[i] /** der_sig(output)*/;
 		weights[i] = weight;
 	}
-	bias = bias + n * error* der_sig(output);
+	bias = bias + n * error/** der_sig(output)*/;
 }
 
