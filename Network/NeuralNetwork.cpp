@@ -54,23 +54,18 @@ std::string NeuralNetwork::classify(Sample sample)
 	std::vector<long double> outputLayerOutputs;
 
 	inputLayerOutputs.resize(inputLayer.size());
-	for (int i = 0; i < inputLayer.size(); i++)
-	{
-		std::vector<long double> values;
-		values.push_back(sample[i]);
-		inputLayerOutputs[i] = inputLayer[i].classify(values);
+	for(int i = 0; i < inputLayer.size(); i++) {
+		inputLayerOutputs[i] = sample[i];
 	}
 
 
 	hiddenLayerOutputs.resize(hiddenLayer.size());
-	for (int i = 0; i < hiddenLayer.size(); i++)
-	{
+	for(int i = 0; i < hiddenLayer.size(); i++) {
 		hiddenLayerOutputs[i] = hiddenLayer[i].classify(inputLayerOutputs);
 	}
 
 	outputLayerOutputs.resize(outputLayer.size());
-	for (int i = 0; i < outputLayer.size(); i++)
-	{
+	for(int i = 0; i < outputLayer.size(); i++) {
 		outputLayerOutputs[i] = outputLayer[i].classify(hiddenLayerOutputs);
 	}
 
@@ -119,9 +114,7 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 			inputLayerOutputs.resize(inputLayer.size());
 			for (int i = 0; i < inputLayer.size(); i++)
 			{
-				std::vector<long double> values;
-				values.push_back(sample[i]);
-				inputLayerOutputs[i] = inputLayer[i].classify(values);
+				inputLayerOutputs[i] = sample[i];
 			}
 
 
@@ -151,7 +144,7 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				// on i index in last layer and computing error
 
 				expectedValue = ((sample.getClass() == CLASSES[i]) ? 1.0 : 0.0);
-				outputLayerError[i] =(expectedValue - (outputLayerOutputs[i]) * deriv(outputLayerOutputs[i]));
+				outputLayerError[i] =(expectedValue - (outputLayerOutputs[i])) * deriv(outputLayerOutputs[i]);
 			}
 
 			std::vector<long double> hiddenLayerError;
@@ -168,32 +161,9 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 
 			}
 
-			std::vector<long double> inputLayerError;
-			inputLayerError.resize(inputLayerOutputs.size());
-			for (int i = 0; i < inputLayerError.size(); i++)
-			{
-				long double error = 0.0;
-				for (int j = 0; j < hiddenLayerError.size(); j++)
-				{
-					error += (hiddenLayerError[j] * hiddenLayer[j][i]);
-				}
-				inputLayerError[i] = error *  deriv(inputLayerOutputs[i]);
-
-			}
 
 			///////////////////////////////////////
 
-
-			for (int i = 0; i < inputLayer.size(); i++)
-			{
-					Neuron neuron = inputLayer[i];
-				
-					std::vector<long double> inputs;
-					inputs.push_back(sample[i]);
-					neuron.modify(n, inputLayerError[i], inputs,inputLayerOutputs[i]);
-					inputLayer[i] = neuron;
-				
-			}
 
 			for (int i = 0; i < hiddenLayer.size(); i++)
 			{
@@ -251,9 +221,7 @@ long double NeuralNetwork::error_fun(std::vector<Sample> samples)
 		inputLayerOutputs.resize(inputLayer.size());
 		for (int i = 0; i < inputLayer.size(); i++)
 		{
-			std::vector<long double> values;
-			values.push_back(sample[i]);
-			inputLayerOutputs[i] = inputLayer[i].classify(values);
+			inputLayerOutputs[i] = sample[i];
 		}
 
 

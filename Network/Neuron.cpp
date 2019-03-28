@@ -21,7 +21,7 @@ Neuron::Neuron(int size)
 	this->weights.resize(size);
 	for (int i = 0; i < size; i++)
 	{
-		this->weights[i] = sqrt(2.0 / (size + 1.0));
+		this->weights[i] = (((double)rand() / RAND_MAX) * 2.0 - 1.0) / size * 2;
 	}
 
 	bias = 0;

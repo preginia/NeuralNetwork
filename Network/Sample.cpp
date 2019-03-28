@@ -21,7 +21,7 @@ int Sample::getSize()
 
 long double Sample::operator[](const int index)
 {
-	return this->properties[index];
+	return this->properties[index] / 100;
 }
 
 std::string Sample::getClass()
