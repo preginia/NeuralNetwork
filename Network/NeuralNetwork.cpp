@@ -16,10 +16,11 @@ long double deriv(long double x)
 }
 
 
-NeuralNetwork::NeuralNetwork(int inputLayerSize, int hiddenLayerSize, int outputLayerSize)
+NeuralNetwork::NeuralNetwork(int inputLayerSize, int hiddenLayerSize, int hiddenLayerSize2, int outputLayerSize)
 {
 	this->inputLayer.resize(inputLayerSize);
 	this->hiddenLayer.resize(hiddenLayerSize);
+	this->hiddenLayer2.resize(hiddenLayerSize2);
 	this->outputLayer.resize(outputLayerSize);
 	
 	for (int i = 0; i < inputLayerSize; i++)
@@ -34,9 +35,15 @@ NeuralNetwork::NeuralNetwork(int inputLayerSize, int hiddenLayerSize, int output
 		hiddenLayer[i] = neuron;
 	}
 
-	for (int i = 0; i < outputLayerSize; i++)
+	for (int i = 0; i < hiddenLayerSize2; i++)
 	{
 		Neuron neuron(hiddenLayerSize);
+		hiddenLayer2[i] = neuron;
+	}
+
+	for (int i = 0; i < outputLayerSize; i++)
+	{
+		Neuron neuron(hiddenLayerSize2);
 		outputLayer[i] = neuron;
 	}
 
@@ -51,6 +58,7 @@ std::string NeuralNetwork::classify(Sample sample)
 {
 	std::vector<long double> inputLayerOutputs;
 	std::vector<long double> hiddenLayerOutputs;
+	std::vector<long double> hiddenLayerOutputs2;
 	std::vector<long double> outputLayerOutputs;
 
 	inputLayerOutputs.resize(inputLayer.size());
@@ -64,9 +72,14 @@ std::string NeuralNetwork::classify(Sample sample)
 		hiddenLayerOutputs[i] = hiddenLayer[i].classify(inputLayerOutputs);
 	}
 
+	hiddenLayerOutputs2.resize(hiddenLayer2.size());
+	for (int i = 0; i < hiddenLayer2.size(); i++) {
+		hiddenLayerOutputs2[i] = hiddenLayer2[i].classify(hiddenLayerOutputs);
+	}
+
 	outputLayerOutputs.resize(outputLayer.size());
 	for(int i = 0; i < outputLayer.size(); i++) {
-		outputLayerOutputs[i] = outputLayer[i].classify(hiddenLayerOutputs);
+		outputLayerOutputs[i] = outputLayer[i].classify(hiddenLayerOutputs2);
 	}
 
 	int index = -1;
@@ -105,6 +118,7 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 			Sample sample = samples[i];
 			std::vector<long double> inputLayerOutputs;
 			std::vector<long double> hiddenLayerOutputs;
+			std::vector<long double> hiddenLayerOutputs2;
 			std::vector<long double> outputLayerOutputs;
 
 
@@ -124,10 +138,16 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				hiddenLayerOutputs[i] = hiddenLayer[i].classify(inputLayerOutputs);
 			}
 
+			hiddenLayerOutputs2.resize(hiddenLayer2.size());
+			for (int i = 0; i < hiddenLayer2.size(); i++)
+			{
+				hiddenLayerOutputs2[i] = hiddenLayer2[i].classify(hiddenLayerOutputs);
+			}
+
 			outputLayerOutputs.resize(outputLayer.size());
 			for (int i = 0; i < outputLayer.size(); i++)
 			{
-				outputLayerOutputs[i] = outputLayer[i].classify(hiddenLayerOutputs);
+				outputLayerOutputs[i] = outputLayer[i].classify(hiddenLayerOutputs2);
 			}
 			
 
@@ -147,14 +167,28 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				outputLayerError[i] =(expectedValue - (outputLayerOutputs[i])) * deriv(outputLayerOutputs[i]);
 			}
 
-			std::vector<long double> hiddenLayerError;
-			hiddenLayerError.resize(hiddenLayerOutputs.size());
-			for (int i = 0; i < hiddenLayerError.size(); i++)
+			std::vector<long double> hiddenLayerError2;
+			hiddenLayerError2.resize(hiddenLayerOutputs2.size());
+			for (int i = 0; i < hiddenLayerError2.size(); i++)
 			{
 				long double error = 0.0;
 				for (int j = 0; j < outputLayerError.size(); j++)
 				{
 					error += (outputLayerError[j] * outputLayer[j][i]);
+				}
+
+				hiddenLayerError2[i] = error * deriv(hiddenLayerOutputs2[i]);
+
+			}
+
+			std::vector<long double> hiddenLayerError;
+			hiddenLayerError.resize(hiddenLayerOutputs.size());
+			for (int i = 0; i < hiddenLayerError.size(); i++)
+			{
+				long double error = 0.0;
+				for (int j = 0; j < hiddenLayerError2.size(); j++)
+				{
+					error += (hiddenLayerError2[j] * hiddenLayer2[j][i]);
 				}
 
 				hiddenLayerError[i] = error * deriv(hiddenLayerOutputs[i]);
@@ -173,10 +207,18 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				
 			}
 
+			for (int i = 0; i < hiddenLayer2.size(); i++)
+			{
+				Neuron neuron = hiddenLayer2[i];
+				neuron.modify(n, hiddenLayerError2[i], hiddenLayerOutputs, hiddenLayerOutputs2[i]);
+				hiddenLayer2[i] = neuron;
+
+			}
+
 			for (int i = 0; i < outputLayer.size(); i++)
 			{
 				Neuron neuron = outputLayer[i];
-				neuron.modify(n, outputLayerError[i], hiddenLayerOutputs, outputLayerOutputs[i]);
+				neuron.modify(n, outputLayerError[i], hiddenLayerOutputs2, outputLayerOutputs[i]);
 				outputLayer[i] = neuron;	
 			}
 		
@@ -216,6 +258,7 @@ long double NeuralNetwork::error_fun(std::vector<Sample> samples)
 	{
 		std::vector<long double> inputLayerOutputs;
 		std::vector<long double> hiddenLayerOutputs;
+		std::vector<long double> hiddenLayerOutputs2;
 		std::vector<long double> outputLayerOutputs;
 
 		inputLayerOutputs.resize(inputLayer.size());
@@ -231,10 +274,16 @@ long double NeuralNetwork::error_fun(std::vector<Sample> samples)
 			hiddenLayerOutputs[i] = hiddenLayer[i].classify(inputLayerOutputs);
 		}
 
+		hiddenLayerOutputs2.resize(hiddenLayer2.size());
+		for (int i = 0; i < hiddenLayer2.size(); i++)
+		{
+			hiddenLayerOutputs2[i] = hiddenLayer2[i].classify(hiddenLayerOutputs);
+		}
+
 		outputLayerOutputs.resize(outputLayer.size());
 		for (int i = 0; i < outputLayer.size(); i++)
 		{
-			outputLayerOutputs[i] = outputLayer[i].classify(hiddenLayerOutputs);
+			outputLayerOutputs[i] = outputLayer[i].classify(hiddenLayerOutputs2);
 		}
 
 		long double err = 0.0;
