@@ -6,8 +6,11 @@
 /*const int classesAmount = 8;
 const std::string CLASSES[classesAmount] = { "cp","im","pp","imU","om","omL","imL","imS" };*/
 
-const int classesAmount = 4;
-const std::string CLASSES[classesAmount] = { "1","2","3","4" };
+/*const int classesAmount = 4;
+const std::string CLASSES[classesAmount] = { "1","2","3","4" };*/
+
+const int classesAmount = 10;
+const std::string CLASSES[classesAmount] = { "0","1","2","3","4","5","6","7","8","9" }; 
 
 
 long double deriv(long double x)
@@ -90,16 +93,15 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 {
 
 	std::random_shuffle(samples.begin(), samples.end());
-
 	int best = -1;
 	long double bestErr = 10000;
-	long double n = 0.1;
+	long double n = 0.2;
 	int it = 0;
 
 	while(true)
-	for (int i = 0; i < samples.size(); i++)
-	{ 
-		
+		for (int i = 0; i < samples.size(); i++)
+		{
+
 			// randomize sample to train on it
 			int rd = rand() % samples.size();
 			Sample sample = samples[i];
@@ -129,7 +131,7 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 			{
 				outputLayerOutputs[i] = outputLayer[i].classify(hiddenLayerOutputs);
 			}
-			
+
 
 			// compute error for each layer with back propagation algorith
 
@@ -144,7 +146,7 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				// on i index in last layer and computing error
 
 				expectedValue = ((sample.getClass() == CLASSES[i]) ? 1.0 : 0.0);
-				outputLayerError[i] =(expectedValue - (outputLayerOutputs[i])) * deriv(outputLayerOutputs[i]);
+				outputLayerError[i] = (expectedValue - (outputLayerOutputs[i])) * deriv(outputLayerOutputs[i]);
 			}
 
 			std::vector<long double> hiddenLayerError;
@@ -170,40 +172,42 @@ void NeuralNetwork::train(std::vector<Sample> samples)
 				Neuron neuron = hiddenLayer[i];
 				neuron.modify(n, hiddenLayerError[i], inputLayerOutputs, hiddenLayerOutputs[i]);
 				hiddenLayer[i] = neuron;
-				
+
 			}
 
 			for (int i = 0; i < outputLayer.size(); i++)
 			{
 				Neuron neuron = outputLayer[i];
 				neuron.modify(n, outputLayerError[i], hiddenLayerOutputs, outputLayerOutputs[i]);
-				outputLayer[i] = neuron;	
+				outputLayer[i] = neuron;
 			}
-		
 
-		// counting how many samples are corectly classify with current weights
-		int correcrtly_classified = 0;
-		for (auto sample : samples)
-		{
-			std::string out = this->classify(sample);
-			if (out == sample.getClass())
-				correcrtly_classified++;
+			if(it%5000==0)
+			{
+				// counting how many samples are corectly classify with current weights
+				int correcrtly_classified = 0;
+				for (auto sample : samples)
+				{
+					std::string out = this->classify(sample);
+					if (out == sample.getClass())
+						correcrtly_classified++;
 
-		}
+				}
 
-		// remebering best result
-		if(correcrtly_classified > best)
-			best = correcrtly_classified;
-		
-		// compute loss error function
-		long double err = this->error_fun(samples);
+				// remebering best result
+				if (correcrtly_classified > best)
+					best = correcrtly_classified;
 
-		// remembering lowest error
-		if (err < bestErr)
-			bestErr = err;
-	
-		std::cout << err << " || " << bestErr << " || " << correcrtly_classified << " || " << best<< std::endl;
+				// compute loss error function
+				long double err = this->error_fun(samples);
 
+				// remembering lowest error
+				if (err < bestErr)
+					bestErr = err;
+
+				std::cout << err << " || " << bestErr << " || " << correcrtly_classified << " || " << best << std::endl;
+			}
+			it++;
 	}
 
 
